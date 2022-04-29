@@ -1,0 +1,91 @@
+Oxen {
+
+     lowercaseVowel
+        = "a" | "e" | "i" | "o" | "u"
+
+     uppercaseVowel
+        = "A" | "E" | "I" | "O" | "U"
+
+     // An Ox Number is an identifying number used for
+     // some Oxen. It cannot include 1s or 0s
+     oxNumber
+        = ("2" | "3" | "4" | "5" | "6" | "7" | "8" | "9")+
+
+     littleOxShort
+        = "x" lowercaseVowel
+        | lowercaseVowel "x"
+
+     littleOxLong
+        = lowercaseVowel "x" lowercaseVowel
+
+     littleOx
+        = littleOxLong
+        | littleOxShort
+
+     bigOxShort
+        = "X" uppercaseVowel
+        | uppercaseVowel "X"
+
+     bigOxLong
+        = uppercaseVowel "X" uppercaseVowel
+
+     bigOx
+        = bigOxLong
+        | bigOxShort
+
+     ox
+        = littleOx oxNumber?
+        | bigOx oxNumber?
+
+     oxClinicalName
+        = "N" digit+ "<" oxFamilyName ">"
+        | "N" digit+ "<" ox ">"
+
+     oxFamilyName
+        = oxName "-" oxFamilyName
+        | oxClinicalName "-" oxFamilyName
+        | oxName "-" oxName
+
+     oxName
+        = oxFamilyName oxQualifier?
+        | oxClinicalName oxQualifier?
+        | ox oxQualifier?
+
+     ownerToken
+        = "O" digit digit digit digit
+
+     oxQualifier
+        = "#t" --missingTail
+        | "#f" --infertile
+        | "#u" --underweight
+
+     lineTerminator
+        = "\r\n"
+        | "\n"
+
+     nonLineTerminator
+        = ~lineTerminator any
+
+     OxenPenLine
+        = #(digit+ "." space) oxName+ lineTerminator
+
+     OwnerLine
+        = ownerToken space nonLineTerminator* lineTerminator
+
+     Farm
+        = OwnerLine OxenPenLine+
+
+
+     // Basic whitespace and line termination handling.
+     // Note that we override the default Ohm definition
+     // of `space` to only be spaces or tabs, and NOT
+     // any of the newline characters
+     space := whitespace
+     whitespace
+        = "\t"
+        | "\x0B"    -- verticalTab
+        | "\x0C"    -- formFeed
+        | " "
+        | "\u00A0"  -- noBreakSpace
+        | "\uFEFF"  -- byteOrderMark
+}
